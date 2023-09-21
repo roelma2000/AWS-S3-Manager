@@ -11,6 +11,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Amazon.S3;
 using Amazon.S3.Model;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WPFLab1
 {
@@ -71,7 +72,8 @@ namespace WPFLab1
         private void btnCreateBkt_Click(object sender, EventArgs e)
         {
             string bucketName = txtBucket.Text;
-
+            if (!string.IsNullOrEmpty(bucketName)) 
+            { 
             var observableResponse = Observable.FromAsync(() => s3Client.PutBucketAsync(new PutBucketRequest { BucketName = bucketName }));
 
             observableResponse
@@ -95,6 +97,11 @@ namespace WPFLab1
                         }
                     }
                 );
+            }
+            else 
+            {
+                MessageBox.Show("Invalid Bucket name. Please input a unique Bucket name.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
         }
 
         private void btnDelBkt_Click(object sender, EventArgs e)
