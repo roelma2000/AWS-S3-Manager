@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Amazon.S3;
 using Amazon.S3.Model;
@@ -17,6 +10,7 @@ namespace WPFLab1
     public partial class FrmObjLvlOps : Form
     {
         private AmazonS3Client s3Client;
+
         public FrmObjLvlOps()
         {
             InitializeComponent();
@@ -39,15 +33,18 @@ namespace WPFLab1
 
         private void PopulateBucketComboBox()
         {
-            var listBucketsRequest = new ListBucketsRequest();
-            var response = s3Client.ListBuckets(listBucketsRequest);
-            
-            cmbBoxBucket.Items.Clear();
+            var observableResponse = Observable.FromAsync(() => s3Client.ListBucketsAsync())
+                                               .ObserveOn(this); //Use OnserverOn to avoid cross-thread exception
 
-            foreach (var bucket in response.Buckets)
+            observableResponse.Subscribe(response =>
             {
-                cmbBoxBucket.Items.Add(bucket.BucketName);
-            }
+                cmbBoxBucket.Items.Clear();
+
+                foreach (var bucket in response.Buckets)
+                {
+                    cmbBoxBucket.Items.Add(bucket.BucketName);
+                }
+            });
         }
 
         private void FrmObjLvlOps_Load(object sender, EventArgs e)
@@ -62,16 +59,18 @@ namespace WPFLab1
                 BucketName = selectedBucket,
             };
 
-            var response = s3Client.ListObjects(listObjectsRequest);
+            var observableResponse = Observable.FromAsync(() => s3Client.ListObjectsAsync(listObjectsRequest))
+                                               .ObserveOn(this);
 
-            // Clear existing rows in the DataGridView
-            dataGridViewObj.Rows.Clear();
-
-            foreach (var obj in response.S3Objects)
+            observableResponse.Subscribe(response =>
             {
-                // Add a new row to the DataGridView with ObjectName and Size columns
-                dataGridViewObj.Rows.Add(obj.Key, obj.Size);
-            }
+                dataGridViewObj.Rows.Clear();
+
+                foreach (var obj in response.S3Objects)
+                {
+                    dataGridViewObj.Rows.Add(obj.Key, obj.Size);
+                }
+            });
         }
 
         private void cmbBoxBucket_SelectedIndexChanged_1(object sender, EventArgs e)
@@ -87,47 +86,59 @@ namespace WPFLab1
         }
 
         private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
+{
+    string selectedFile = openFileDialog1.FileName;
+    textBox1.Text = selectedFile;
+
+    if (!string.IsNullOrEmpty(selectedFile))
+    {
+        string selectedBucket = cmbBoxBucket.SelectedItem.ToString();
+        string objectKey = System.IO.Path.GetFileName(selectedFile);
+
+        var fileStream = new System.IO.FileStream(selectedFile, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+        
+        var request = new PutObjectRequest
         {
-            string selectedFile = openFileDialog1.FileName;
-            textBox1.Text = selectedFile;
+            BucketName = selectedBucket,
+            Key = objectKey,
+            InputStream = fileStream,
+            ContentType = "application/octet-stream"
+        };
 
-            if (!string.IsNullOrEmpty(selectedFile))
+        var observableResponse = Observable.FromAsync(() => s3Client.PutObjectAsync(request))
+                                           .ObserveOn(this);
+
+        observableResponse.Subscribe(response => 
+        {
+            if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
             {
-                string selectedBucket = cmbBoxBucket.SelectedItem.ToString(); // Get the selected S3 bucket from ComboBox
-                string objectKey = System.IO.Path.GetFileName(selectedFile); // Use the filename as the object key
-
-                // Upload the file to S3
-                using (var fileStream = new FileStream(selectedFile, FileMode.Open, FileAccess.Read))
-                {
-                    var request = new PutObjectRequest
-                    {
-                        BucketName = selectedBucket,
-                        Key = objectKey,
-                        InputStream = fileStream,
-                        ContentType = "application/octet-stream" // Set the appropriate content type
-                    };
-
-                    var response = s3Client.PutObject(request);
-
-                    if (response.HttpStatusCode == HttpStatusCode.OK)
-                    {
-                        MessageBox.Show("File uploaded successfully to S3!");
-                    }
-                    else
-                    {
-                        MessageBox.Show("File upload to S3 failed.");
-                    }
-                }
+                MessageBox.Show("File uploaded successfully to S3!");
                 ReloadDataGridView(selectedBucket);
             }
-            
-        }
+            else
+            {
+                MessageBox.Show("File upload to S3 failed.");
+            }
+
+            fileStream.Close(); // Close the stream after the operation is done.
+        },
+        ex => 
+        {
+            // Handle any error here
+            MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            fileStream.Close(); // Ensure the stream is closed even if an error occurs.
+        });
+
+        
+    }
+}
+
 
         private void FrmObjLvlOps_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing)
             {
-                e.Cancel = true; // This prevents the form from closing
+                e.Cancel = true;
                 MessageBox.Show("You cannot close this Form!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

@@ -32,6 +32,7 @@
             this.btn_bktlvlops = new System.Windows.Forms.Button();
             this.btn_objlvlops = new System.Windows.Forms.Button();
             this.btn_exit = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btn_bktlvlops
@@ -73,11 +74,22 @@
             this.btn_exit.UseVisualStyleBackColor = false;
             this.btn_exit.Click += new System.EventHandler(this.btn_exit_Click);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("MS Reference Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(12, 195);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(408, 29);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "ROWEL ALMUETE - 301137911";
+            // 
             // frm_main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 22F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(769, 183);
+            this.ClientSize = new System.Drawing.Size(764, 242);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.btn_exit);
             this.Controls.Add(this.btn_objlvlops);
             this.Controls.Add(this.btn_bktlvlops);
@@ -87,8 +99,9 @@
             this.MinimizeBox = false;
             this.Name = "frm_main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Lab #1";
+            this.Text = "Lab#1 – AWS S3 & AWS IAM Service";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -97,6 +110,7 @@
         private System.Windows.Forms.Button btn_bktlvlops;
         private System.Windows.Forms.Button btn_objlvlops;
         private System.Windows.Forms.Button btn_exit;
+        private System.Windows.Forms.Label label1;
     }
 }
 

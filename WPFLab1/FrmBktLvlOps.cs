@@ -4,8 +4,10 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 using Amazon.S3;
 using Amazon.S3.Model;
@@ -29,18 +31,18 @@ namespace WPFLab1
             frmMenu.Show();
         }
 
-        private async void FetchS3Buckets()
+        private void FetchS3Buckets()
         {
-            try
-            {
-                var response = await s3Client.ListBucketsAsync();
-                dataGridView1.DataSource = response.Buckets;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            var observableResponse = Observable.FromAsync(() => s3Client.ListBucketsAsync());
+
+            observableResponse.ObserveOn(this).Subscribe(
+                response =>
+                {
+                    dataGridView1.DataSource = response.Buckets;
+                },
+                ex => MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error));
         }
+
 
         private void InitializedBucketGrid()
         {
@@ -59,43 +61,43 @@ namespace WPFLab1
             column2.DataPropertyName = "CreationDate";
             dataGridView1.Columns.Add(column2);
         }
+
         private void FrmBktLvlOps_Load(object sender, EventArgs e)
         {
             InitializedBucketGrid();
             FetchS3Buckets();
         }
 
-     
-        private async void btnCreateBkt_Click(object sender, EventArgs e)
+        private void btnCreateBkt_Click(object sender, EventArgs e)
         {
             string bucketName = txtBucket.Text;
-            try
-            {
-                PutBucketRequest request = new PutBucketRequest
-                {
-                    BucketName = bucketName
-                };
 
-                var response = await s3Client.PutBucketAsync(request);
+            var observableResponse = Observable.FromAsync(() => s3Client.PutBucketAsync(new PutBucketRequest { BucketName = bucketName }));
 
-                MessageBox.Show($"Bucket {bucketName} created successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (AmazonS3Exception amazonS3Exception)
-            {
-                if (amazonS3Exception.ErrorCode == "BucketAlreadyExists")
-                {
-                    MessageBox.Show("The bucket name is already in use. Please choose a different name.", "Bucket Name Taken", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                }
-                else
-                {
-                    MessageBox.Show(amazonS3Exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            FetchS3Buckets();
-            txtBucket.Text = "";
+            observableResponse
+                .ObserveOn(this) //Ensure no Cross thread exception error
+                .Subscribe(
+                    response =>
+                    {
+                        MessageBox.Show($"Bucket {bucketName} created successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        FetchS3Buckets();
+                        txtBucket.Text = "";
+                    },
+                    ex =>
+                    {
+                        if (ex is AmazonS3Exception amazonS3Exception && amazonS3Exception.ErrorCode == "BucketAlreadyExists")
+                        {
+                            MessageBox.Show("The bucket name is already in use. Please choose a different name.", "Bucket Name Taken", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        }
+                        else
+                        {
+                            MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                );
         }
 
-        private async void btnDelBkt_Click(object sender, EventArgs e)
+        private void btnDelBkt_Click(object sender, EventArgs e)
         {
             // Ensure a row is selected
             if (dataGridView1.SelectedRows.Count == 0)
@@ -106,24 +108,26 @@ namespace WPFLab1
 
             string bucketName = dataGridView1.SelectedRows[0].Cells[0].Value.ToString();
 
-            try
-            {
-                DeleteBucketRequest request = new DeleteBucketRequest
-                {
-                    BucketName = bucketName
-                };
+            var observableResponse = Observable.FromAsync(() => s3Client.DeleteBucketAsync(new DeleteBucketRequest { BucketName = bucketName }));
 
-                var response = await s3Client.DeleteBucketAsync(request);
-                MessageBox.Show($"Bucket {bucketName} deleted successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // Reload the DataGridView to reflect changes
-                FetchS3Buckets(); 
-            }
-            catch (AmazonS3Exception amazonS3Exception)
-            {
-                MessageBox.Show(amazonS3Exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            observableResponse
+                .ObserveOn(this) //Ensure no Cross thread exception error
+                .Subscribe(
+                    response =>
+                    {
+                        MessageBox.Show($"Bucket {bucketName} deleted successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        FetchS3Buckets();
+                    },
+                    ex =>
+                    {
+                        if (ex is AmazonS3Exception amazonS3Exception)
+                        {
+                            MessageBox.Show(amazonS3Exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                );
         }
+
 
         private void FrmBktLvlOps_FormClosing(object sender, FormClosingEventArgs e)
         {
