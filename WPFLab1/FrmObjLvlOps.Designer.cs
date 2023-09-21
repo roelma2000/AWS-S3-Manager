@@ -47,12 +47,13 @@
             this.btnBrowse.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnBrowse.ForeColor = System.Drawing.Color.Yellow;
             this.btnBrowse.Location = new System.Drawing.Point(1238, 14);
-            this.btnBrowse.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btnBrowse.Margin = new System.Windows.Forms.Padding(5);
             this.btnBrowse.Name = "btnBrowse";
             this.btnBrowse.Size = new System.Drawing.Size(635, 116);
             this.btnBrowse.TabIndex = 3;
             this.btnBrowse.Text = "Browse";
             this.btnBrowse.UseVisualStyleBackColor = false;
+            this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
             // 
             // btnUpload
             // 
@@ -60,7 +61,7 @@
             this.btnUpload.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnUpload.ForeColor = System.Drawing.Color.Yellow;
             this.btnUpload.Location = new System.Drawing.Point(1238, 140);
-            this.btnUpload.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btnUpload.Margin = new System.Windows.Forms.Padding(5);
             this.btnUpload.Name = "btnUpload";
             this.btnUpload.Size = new System.Drawing.Size(635, 116);
             this.btnUpload.TabIndex = 4;
@@ -74,7 +75,7 @@
             this.btnBacktoMainWindowfrmObj.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnBacktoMainWindowfrmObj.ForeColor = System.Drawing.Color.Yellow;
             this.btnBacktoMainWindowfrmObj.Location = new System.Drawing.Point(1238, 919);
-            this.btnBacktoMainWindowfrmObj.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btnBacktoMainWindowfrmObj.Margin = new System.Windows.Forms.Padding(5);
             this.btnBacktoMainWindowfrmObj.Name = "btnBacktoMainWindowfrmObj";
             this.btnBacktoMainWindowfrmObj.Size = new System.Drawing.Size(635, 106);
             this.btnBacktoMainWindowfrmObj.TabIndex = 5;
@@ -108,16 +109,18 @@
             // 
             this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox1.Location = new System.Drawing.Point(141, 144);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(5);
             this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
             this.textBox1.Size = new System.Drawing.Size(1087, 35);
             this.textBox1.TabIndex = 8;
             // 
             // cmbBoxBucket
             // 
+            this.cmbBoxBucket.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbBoxBucket.FormattingEnabled = true;
             this.cmbBoxBucket.Location = new System.Drawing.Point(141, 29);
-            this.cmbBoxBucket.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.cmbBoxBucket.Margin = new System.Windows.Forms.Padding(5);
             this.cmbBoxBucket.Name = "cmbBoxBucket";
             this.cmbBoxBucket.Size = new System.Drawing.Size(1087, 37);
             this.cmbBoxBucket.TabIndex = 9;
@@ -128,7 +131,7 @@
             this.dataGridViewObj.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridViewObj.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewObj.Location = new System.Drawing.Point(15, 256);
-            this.dataGridViewObj.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.dataGridViewObj.Margin = new System.Windows.Forms.Padding(5);
             this.dataGridViewObj.Name = "dataGridViewObj";
             this.dataGridViewObj.RowHeadersWidth = 82;
             this.dataGridViewObj.RowTemplate.Height = 28;
@@ -155,7 +158,7 @@
             this.Controls.Add(this.btnBrowse);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.Margin = new System.Windows.Forms.Padding(5);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FrmObjLvlOps";
